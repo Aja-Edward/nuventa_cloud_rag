@@ -1,0 +1,9 @@
+openai
+python-dotenv
+langchain
+langchain-community
+langchain-openai
+psycopg2-binary
+pypdf
+tiktoken
+pgvector
