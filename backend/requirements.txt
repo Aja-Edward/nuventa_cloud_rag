@@ -10,3 +10,5 @@ pgvector
 fastapi
 uvicorn[standard]
 cloudinary
+python-multipart
+pypdf2
