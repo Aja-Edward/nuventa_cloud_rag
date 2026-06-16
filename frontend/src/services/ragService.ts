@@ -1,10 +1,11 @@
 import type { ApiStatus, AskResponse } from "../types/types";
 
-const API_BASE = "http://localhost:8000";
+// const API_BASE = "http://localhost:8000";
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 export async function fetchHealth(): Promise<ApiStatus> {
   try {
-    const res = await fetch(`${API_BASE}/health`);
+    const res = await fetch(`${API_BASE_URL}/health`);
     return res.ok ? "online" : "offline";
   } catch {
     return "offline";
@@ -13,7 +14,7 @@ export async function fetchHealth(): Promise<ApiStatus> {
 
 export async function fetchStats(): Promise<number | null> {
   try {
-    const res = await fetch(`${API_BASE}/stats`);
+    const res = await fetch(`${API_BASE_URL}/stats`);
     if (!res.ok) return null;
     const data = await res.json();
     return typeof data.total_chunks === "number" ? data.total_chunks : null;
@@ -27,7 +28,7 @@ export async function askQuestion(
   topK:                number = 5,
   similarityThreshold: number = 0.3
 ): Promise<AskResponse> {
-  const res = await fetch(`${API_BASE}/ask`, {
+  const res = await fetch(`${API_BASE_URL}/ask`, {
     method:  "POST",
     headers: { "Content-Type": "application/json" },
     body:    JSON.stringify({
