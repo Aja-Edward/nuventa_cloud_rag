@@ -6,6 +6,12 @@ import { TypingDots }   from "../components/Typingdots";
 import { useChat }      from "../hooks/useChat";
 import { useApiStatus } from "../hooks/useApiStatus";
 
+// pages/ChatPage.tsx
+import { API_BASE_URL } from "../services/ragService"; // or wherever it's imported
+
+console.log("API BASE:", import.meta.env.VITE_API_BASE_URL);
+console.log("API BASE URL:", API_BASE_URL);
+
 /**
  * ChatPage
  *

@@ -36,6 +36,12 @@ app = FastAPI(
     version="1.0.0",
 )
 
+
+origins = [
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "https://nuventa-cloud-rag.vercel.app/"
+]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],          # tighten in production

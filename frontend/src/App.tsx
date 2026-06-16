@@ -6,6 +6,7 @@ import './App.css'
 
 function App() {
   const [count, setCount] = useState(0)
+  console.log("API BASE:", import.meta.env.VITE_API_BASE_URL);
 
   return (
     <>
@@ -14,6 +15,7 @@ function App() {
           <img src={heroImg} className="base" width="170" height="179" alt="" />
           <img src={reactLogo} className="framework" alt="React logo" />
           <img src={viteLogo} className="vite" alt="Vite logo" />
+        
         </div>
         <div>
           <h1>Get started</h1>
