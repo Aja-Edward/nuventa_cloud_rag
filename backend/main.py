@@ -19,11 +19,22 @@ import time
 from typing import Optional
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+import shutil
+import cloudinary
+import cloudinary.uploader
+from fastapi import UploadFile, File, FastAPI, HTTPException
 
 load_dotenv()
+
+# Configure Cloudinary
+cloudinary.config(
+    cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
+    api_key=os.getenv("CLOUDINARY_API_KEY"),
+    api_secret=os.getenv("CLOUDINARY_API_SECRET"),
+)
+
 
 # ── lazy imports so the app still starts even if heavy deps are loading ──────
 
@@ -71,10 +82,6 @@ class AskResponse(BaseModel):
     answer: str
     sources: list[SourceChunk]
     elapsed_ms: int
-
-
-class IngestRequest(BaseModel):
-    pdf_path: str
 
 
 # ── helpers ──────────────────────────────────────────────────────────────────
@@ -195,17 +202,40 @@ def ask(req: AskRequest):
 
 
 @app.post("/ingest")
-def ingest_pdf(req: IngestRequest):
-    """Trigger ingestion of a PDF into the database."""
-    import os
-    from ingest import setup_db, ingest as run_ingest
+async def ingest_pdf(file: UploadFile = File(...)):
+    """Upload PDF to Cloudinary, process it, store embeddings in Supabase."""
+    tmp_path = f"/tmp/{file.filename}"
 
-    if not os.path.exists(req.pdf_path):
-        raise HTTPException(
-            status_code=404, detail=f"File not found: {req.pdf_path}")
     try:
+        # 1. Save upload temporarily to /tmp
+        with open(tmp_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+
+        # 2. Upload to Cloudinary for storage
+        upload_result = cloudinary.uploader.upload(
+            tmp_path,
+            resource_type="raw",
+            folder="rag_pdfs",
+            public_id=file.filename,
+        )
+        cloudinary_url = upload_result.get("secure_url")
+        print(f"✅ Uploaded to Cloudinary: {cloudinary_url}")
+
+        # 3. Process the local /tmp copy (already there, no re-download needed)
+        from ingest import setup_db, ingest as run_ingest
         setup_db()
-        run_ingest(req.pdf_path)
-        return {"status": "ingested", "pdf_path": req.pdf_path}
+        run_ingest(tmp_path)
+
+        return {
+            "status": "ingested",
+            "filename": file.filename,
+            "cloudinary_url": cloudinary_url,
+        }
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+    finally:
+        # 4. Clean up /tmp — file is safe on Cloudinary
+        if os.path.exists(tmp_path):
+            os.remove(tmp_path)

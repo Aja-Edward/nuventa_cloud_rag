@@ -11,7 +11,10 @@ load_dotenv()
 def setup_db():
     conn = get_connection()
     cur = conn.cursor()
-    cur.execute("CREATE EXTENSION IF NOT EXISTS vector;")
+    try:
+        cur.execute("CREATE EXTENSION IF NOT EXISTS vector;")
+    except Exception:
+        conn.rollback()  # extension already exists or no permission — safe to ignore
     cur.execute("""
         CREATE TABLE IF NOT EXISTS documents (
             id          SERIAL PRIMARY KEY,
