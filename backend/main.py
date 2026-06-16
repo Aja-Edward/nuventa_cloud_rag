@@ -239,3 +239,26 @@ async def ingest_pdf(file: UploadFile = File(...)):
         # 4. Clean up /tmp — file is safe on Cloudinary
         if os.path.exists(tmp_path):
             os.remove(tmp_path)
+
+
+@app.post("/debug-pdf")
+async def debug_pdf(file: UploadFile = File(...)):
+    import shutil
+    tmp_path = f"/tmp/{file.filename}"
+    with open(tmp_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    from pdf_loader import load_pdf
+    from chunker import chunk_text
+
+    text = load_pdf(tmp_path)
+    chunks = chunk_text(text)
+
+    os.remove(tmp_path)
+
+    return {
+        "total_characters": len(text),
+        "total_chunks": len(chunks),
+        "first_500_chars": text[:500],
+        "sample_chunks": chunks[:3],
+    }
