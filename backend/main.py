@@ -40,7 +40,7 @@ app = FastAPI(
 origins = [
     "http://localhost:3000",
     "http://localhost:5173",
-    "https://nuventa-cloud-rag.vercel.app/"
+    "https://nuventa-cloud-rag.vercel.app"
 ]
 app.add_middleware(
     CORSMiddleware,
