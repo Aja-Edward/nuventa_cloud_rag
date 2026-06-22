@@ -41,9 +41,9 @@ Tuning constants (adjust to taste):
 import re
 
 # ── tuneable constants ──────────────────────────────────────────────────────
-CHUNK_SIZE = 1_600   # characters  (~400 tokens)
-OVERLAP_SIZE = 320   # characters  (~80 tokens)
-MIN_CHUNK = 200   # characters  (~50 tokens)
+CHUNK_SIZE = 800   # characters  (~200 tokens)  ← halved from 1600
+OVERLAP_SIZE = 160   # characters  (~40 tokens)   ← keep at ~20% of CHUNK_SIZE
+MIN_CHUNK = 100   # characters  (~25 tokens)   ← halved from 200
 # ───────────────────────────────────────────────────────────────────────────
 
 
