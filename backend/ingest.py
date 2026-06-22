@@ -33,6 +33,10 @@ def setup_db():
 def store_chunks(source, chunks, embeddings):
     conn = get_connection()
     cur = conn.cursor()
+
+    # Delete existing chunks for this source before re-inserting
+    cur.execute("DELETE FROM documents WHERE source = %s", (source,))
+
     for i, (chunk, embedding) in enumerate(zip(chunks, embeddings)):
         cur.execute(
             "INSERT INTO documents (source, chunk_index, content, embedding) VALUES (%s, %s, %s, %s)",
